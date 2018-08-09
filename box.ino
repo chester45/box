@@ -1,7 +1,8 @@
-#include "Box.h"
-#include "log.h"
 #include <avr/sleep.h>
 #include <Arduino.h>
+#include "Box.h"
+#include "log.h"
+#include "TimerObjectManager.h"
 
 Box::Box box(DEFAULT_USER_SWITCH);
 
@@ -35,6 +36,7 @@ void setup()
     Serial.begin(9600);
     log_initialize(write_log);
     LOG("Setup complete\n");
+    uint8_t tim_idx = TimerObjectManager::GetManager()->CreateTimer();
 }
 
 void loop()

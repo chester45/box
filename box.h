@@ -11,6 +11,8 @@
 
 #define DEFAULT_USER_SWITCH 2
 
+//On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
+
 namespace Box
 {
 class Box {
@@ -22,6 +24,7 @@ private:
         SWITCH_CHANGE,
         IN_ACTION
     };
+
 
     uint8_t UserSwitchPin;
 
