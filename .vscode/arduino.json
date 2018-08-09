@@ -1,0 +1,6 @@
+{
+    "sketch": "box.ino",
+    "board": "arduino:avr:nano",
+    "port": "COM29",
+    "configuration": "cpu=atmega328"
+}
