@@ -13,13 +13,13 @@ Box::Box(uint8_t SwitchPin)
     state = BoxState::IDLE;
     timer_delay = new TimerObject(BOX_DELAY, this, Box::staticDelayCallback, false);
     UserSwitchPin = SwitchPin;
-    setup();
+    Setup();
 }
 
 void Box::timerDelayCallback()
 {
     LOG("delay callback\n");
-    setState(BoxState::IDLE);
+    SetState(BoxState::IDLE);
     timer_delay->Stop();
 }
 
@@ -28,12 +28,12 @@ void Box::timerSwitchPwmCallback()
     LOG("PWM callback");
 }
 
-void Box::setup()
+void Box::Setup()
 {
     pinMode(UserSwitchPin, INPUT_PULLUP);
 }
 
-void Box::check()
+void Box::Check()
 {
     uint8_t pin_state = digitalRead(UserSwitchPin);
     timer_delay->Update();
@@ -44,7 +44,7 @@ void Box::check()
             if (!pin_state)
             {
                 timer_delay->Start();
-                setState(BoxState::WAIT);
+                SetState(BoxState::WAIT);
             }
         break;
         case BoxState::WAIT:
@@ -58,12 +58,12 @@ void Box::check()
     }
 }
 
-bool Box::isIdle() const
+bool Box::IsIdle() const
 {
     return (state == BoxState::IDLE);
 }
 
-uint8_t Box::getSwitchPin() const
+uint8_t Box::GetSwitchPin() const
 {
     return UserSwitchPin;
 }

@@ -13,7 +13,7 @@ static void write_log(char *buf)
 static void interrputCallback(void)
 {
     sleep_disable();
-    detachInterrupt(digitalPinToInterrupt(box.getSwitchPin()));
+    detachInterrupt(digitalPinToInterrupt(box.GetSwitchPin()));
 }
 
 static void sleepSetup()
@@ -22,7 +22,7 @@ static void sleepSetup()
     Serial.flush();                 // flush serial port before sleep
     cli();
     sleep_enable();
-    attachInterrupt(digitalPinToInterrupt(box.getSwitchPin()),
+    attachInterrupt(digitalPinToInterrupt(box.GetSwitchPin()),
                     interrputCallback, LOW);    // user switch can wakeup
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sei();
@@ -39,8 +39,8 @@ void setup()
 
 void loop()
 {
-    box.check();
-    if (box.isIdle())
+    box.Check();
+    if (box.IsIdle())
     {
         LOG("Going to sleep\n");
         sleepSetup();

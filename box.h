@@ -29,21 +29,19 @@ private:
     TimerObject *timer_delay;
     TimerObject *timer_swtich_pwm;
 
-    void setState(const BoxState new_state) {state = new_state;}
+    void SetState(const BoxState new_state) {state = new_state;}
 
 public:
     Box(uint8_t SwitchPin);
     void timerDelayCallback();
     void timerSwitchPwmCallback();
-    void setup();
-    void check();
-    bool isIdle() const;
-    uint8_t getSwitchPin() const;
+    void Setup();
+    void Check();
+    bool IsIdle() const;
+    uint8_t GetSwitchPin() const;
     static void staticDelayCallback(void *box) {static_cast<Box*>(box)->timerDelayCallback();};
     static void staticSwitchPwmCallback(void *box) {static_cast<Box*>(box)->timerSwitchPwmCallback();};
 };
-
 }
-
 
 #endif
