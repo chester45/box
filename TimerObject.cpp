@@ -76,6 +76,10 @@ void TimerObject::Update(){
 		{
 			onObjRun(Obj);
 		}
+		else if (onObjRun)	/// Custom modification to allow to pass NULL as callback parameter
+		{
+			onObjRun(Obj);
+		}
 	}
 
 }
