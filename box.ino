@@ -4,6 +4,7 @@
 #include "log.h"
 #include "TimerObjectManager.h"
 
+TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
 Box::Box box(DEFAULT_USER_SWITCH);
 
 static void write_log(char *buf)
@@ -36,12 +37,12 @@ void setup()
     Serial.begin(9600);
     log_initialize(write_log);
     LOG("Setup complete\n");
-    uint8_t tim_idx = TimerObjectManager::GetManager()->CreateTimer();
 }
 
 void loop()
 {
     box.Check();
+    TimerManager->UpdateTimers();
     if (box.IsIdle())
     {
         LOG("Going to sleep\n");
