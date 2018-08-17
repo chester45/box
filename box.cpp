@@ -8,50 +8,39 @@ namespace Box
 #define BOX_DELAY (2000) // 2 sec
 #define PWM_DELAY (1000) // 1 sec
 
-Box::Box(uint8_t SwitchPin)
+Box::Box(uint8_t SwitchPin, uint8_t CoverServoPin, uint8_t StickServoPin)
 {
     state = BoxState::IDLE;
-    timer_delay = new TimerObject(BOX_DELAY, this, Box::staticDelayCallback, false);
     UserSwitchPin = SwitchPin;
+    this->CoverServoPin = CoverServoPin;
+    this->StickServoPin = StickServoPin;
     Setup();
-}
-
-void Box::timerDelayCallback()
-{
-    LOG("delay callback\n");
-    SetState(BoxState::IDLE);
-    timer_delay->Stop();
-}
-
-void Box::timerSwitchPwmCallback()
-{
-    LOG("PWM callback");
 }
 
 void Box::Setup()
 {
     pinMode(UserSwitchPin, INPUT_PULLUP);
+    CoverServo.attach(CoverServoPin);
+    StickServo.attach(StickServoPin);
+    CoverServo.WriteDelay(0);
+    StickServo.WriteDelay(0);
 }
 
 void Box::Check()
 {
     uint8_t pin_state = digitalRead(UserSwitchPin);
-    timer_delay->Update();
-    timer_swtich_pwm->Update();
+
     switch (state)
     {
         case BoxState::IDLE:
             if (!pin_state)
             {
-                timer_delay->Start();
-                SetState(BoxState::WAIT);
+                //SetState(BoxState::WAIT);
             }
         break;
         case BoxState::WAIT:
             if (!pin_state)
-            {
-                timer_delay->Start();
-            }
+            {}
         break;
         default:
             break;

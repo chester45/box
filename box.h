@@ -2,6 +2,7 @@
 #define BOX_H_
 
 #include <stdint.h>
+#include "MyServo.h"
 #include "TimerObject.h"
 
 #define SRV_COVER   1
@@ -9,7 +10,9 @@
 #define LED_SWITCH  3
 #define LED_AMBIENT 4
 
-#define DEFAULT_USER_SWITCH 2
+#define DEFAULT_USER_SWITCH         2
+#define DEFAULT_COVER_SERVO_PIN     9
+#define DEFAULT_STICK_SERVO_PIN     10
 
 //On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
 
@@ -27,23 +30,21 @@ private:
 
 
     uint8_t UserSwitchPin;
-
+    uint8_t CoverServoPin;
+    uint8_t StickServoPin;
+    MyServo CoverServo;
+    MyServo StickServo;
     BoxState state;
-    TimerObject *timer_delay;
-    TimerObject *timer_swtich_pwm;
-
     void SetState(const BoxState new_state) {state = new_state;}
 
 public:
-    Box(uint8_t SwitchPin);
+    Box(uint8_t SwitchPin, uint8_t CoverServoPin, uint8_t StickServoPin);
     void timerDelayCallback();
     void timerSwitchPwmCallback();
     void Setup();
     void Check();
     bool IsIdle() const;
     uint8_t GetSwitchPin() const;
-    static void staticDelayCallback(void *box) {static_cast<Box*>(box)->timerDelayCallback();};
-    static void staticSwitchPwmCallback(void *box) {static_cast<Box*>(box)->timerSwitchPwmCallback();};
 };
 }
 
