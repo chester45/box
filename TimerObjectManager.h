@@ -1,3 +1,6 @@
+#ifndef _TIMER_OBJECT_MANAGER_H
+#define _TIMER_OBJECT_MANAGER_H
+
 #include "stdlib.h"
 #include "TimerObject.h"
 
@@ -30,3 +33,5 @@ class TimerObjectManager
         uint8_t GetFreeTimer();
         bool IsValidTimerIndex(uint8_t);
 };
+
+#endif
