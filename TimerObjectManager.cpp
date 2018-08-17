@@ -1,12 +1,14 @@
 #include "TimerObjectManager.h"
+#include "log.h"
 
-TimerObjectManager* TimerObjectManager::Instance = nullptr;
+TimerObjectManager* TimerObjectManager::Instance = NULL;
 
 TimerObjectManager* TimerObjectManager::GetManager()
 {
-    if (Instance == nullptr)
+    if (Instance == NULL)
     {
         Instance = new TimerObjectManager();
+        Instance->Init();
     }
     return Instance;
 }
@@ -15,7 +17,7 @@ void TimerObjectManager::Init()
 {
     for (uint8_t idx = 0; idx < MAX_TIMER_OBJECTS; idx++)
     {
-        TimersArray[idx] = nullptr;
+        TimersArray[idx] = NULL;
     }
 }
 
@@ -25,6 +27,11 @@ uint8_t TimerObjectManager::CreateTimer(unsigned long int ms, void *param, Timer
     if(TimerIndex != INVALID_TIMER_IDX)
     {
         TimersArray[TimerIndex] = new TimerObject(ms, param, callback, isSingle);
+        LOG("Create timer with index: %d\n", TimerIndex);
+    }
+    else
+    {
+        LOG("Failed to create timer object\n");
     }
     return TimerIndex;
 }
@@ -33,7 +40,7 @@ void TimerObjectManager::UpdateTimers()
 {
     for (uint8_t idx = 0; idx < MAX_TIMER_OBJECTS; idx++)
     {
-        if (TimersArray[idx] != nullptr)
+        if (TimersArray[idx] != NULL)
         {
             TimersArray[idx]->Update();
         }
@@ -43,9 +50,11 @@ void TimerObjectManager::UpdateTimers()
 uint8_t TimerObjectManager::GetFreeTimer()
 {
     uint8_t TimerIndex = INVALID_TIMER_IDX;
-    for (uint8_t idx = 0; idx < MAX_TIMER_OBJECTS; idx++)
+    uint8_t idx = 0;
+    for (idx = 0; idx < MAX_TIMER_OBJECTS; idx++)
     {
-        if (TimersArray[idx] == nullptr)
+        LOG("Idx: %d, val: %d\n", idx, TimersArray[idx]);
+        if (TimersArray[idx] == NULL)
         {
             TimerIndex = idx;
             break;              /// Break the loop sinde we found free slot for timer
@@ -79,7 +88,8 @@ bool TimerObjectManager::DestroyTimer(uint8_t TimerIndex)
     if (IsValidTimerIndex(TimerIndex))
     {
         delete TimersArray[TimerIndex];
-        TimersArray[TimerIndex] = nullptr;
+        TimersArray[TimerIndex] = NULL;
+        LOG("Destroy timer with index: %d\n", TimerIndex);
         return true;
     }
     return false;
@@ -87,7 +97,7 @@ bool TimerObjectManager::DestroyTimer(uint8_t TimerIndex)
 
 bool TimerObjectManager::IsValidTimerIndex(uint8_t Index)
 {
-    if (Index != INVALID_TIMER_IDX && TimersArray[Index] != nullptr)
+    if (Index != INVALID_TIMER_IDX && TimersArray[Index] != NULL)
     {
         return true;
     }

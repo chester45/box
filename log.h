@@ -11,9 +11,9 @@ void log_initialize(const log_func_t);
 void log_printf(const char *fmt, ...);
 
 #if ENABLE_LOG
-    #define LOG(str) log_printf(str);
+    #define LOG(str, ...) log_printf(str, ##__VA_ARGS__)
 #else
-    #define LOG(str) ;
+    #define LOG(str, ...) ;
 #endif
 
 #endif
