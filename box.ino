@@ -15,9 +15,7 @@
 
 TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
 Box::Box box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_STICK_SERVO_PIN);
-uint8_t StatusLedTimerIdx = TimerObjectManager::INVALID_TIMER_IDX;
-Servo servo;
-
+uint8_t StatusLedTimerIdx = INVALID_TIMER_IDX;
 
 static void write_log(char *buf)
 {
@@ -55,10 +53,9 @@ void setup()
     Serial.begin(9600);
     log_initialize(write_log);
     pinMode(STATUS_LED_PIN, OUTPUT);
-    servo.attach(9);
     LOG("Setup complete\n");
     StatusLedTimerIdx = TimerManager->CreateTimer(1000, NULL, StatusLedTimerCallback, false);
-    if (StatusLedTimerIdx != TimerObjectManager::INVALID_TIMER_IDX)
+    if (StatusLedTimerIdx != INVALID_TIMER_IDX)
     {
         TimerManager->StartTimer(StatusLedTimerIdx);
     }
