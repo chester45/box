@@ -13,10 +13,15 @@ class MyServo : public Servo
     };
 
     MyServo();
+    int CurrentPosition;
+    int NewPostion;
+    void write(int value);
     void WriteDelay(int value);
-    void Move(int value, MoveSpeed Speed);
+    void Move(int Position, MoveSpeed Speed);
+    friend void ServoTimerCallback(void *);
 
     private:
-        uint8_t DelayTimer;
+        uint8_t TimerIndex;
         uint8_t GetMoveDelay(MoveSpeed);
+        void DelayExpired();
 };
