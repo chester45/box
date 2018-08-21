@@ -3,6 +3,8 @@
 #include "TimerObjectManager.h"
 #include "log.h"
 
+const uint8_t MyServo::DelayTime[MoveSpeed::INVALID] = {0, 25, 50};
+
 void ServoTimerCallback(void *Param)
 {
     MyServo *Servo_p = static_cast<MyServo*>(Param);
@@ -35,13 +37,25 @@ void MyServo::WriteDelay(int value)
 
 void MyServo::Move(int Position, MoveSpeed Speed)
 {
-    NewPostion = Position;
-    uint8_t delay = GetMoveDelay(Speed);
-}
+    if (Speed >= MoveSpeed::INVALID)
+    {
+        LOG("Invalid speed value!");
+        return;
+    }
 
-uint8_t MyServo::GetMoveDelay(MoveSpeed Speed)
-{
-    return 20;  // TODO: Adjust return values
+    NewPostion = (Position > MAX_SERVO_POSITION) ? MAX_SERVO_POSITION : Position;
+    uint8_t delay = DelayTime[Speed];
+    if (!delay)
+    {   // Deley is 0, so set servo postion immediately
+        write(NewPostion);
+    }
+    else
+    {
+        // Starting timer to get slower but smooth servo movement
+        TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
+        TimerManager->SetInterval(TimerIndex, delay);
+        TimerManager->StartTimer(TimerIndex);
+    }
 }
 
 void MyServo::DelayExpired()
@@ -55,7 +69,7 @@ void MyServo::DelayExpired()
         write(--CurrentPosition);
     }
     else
-    {
+    { //Servo has reached its postion so stop the timer
         TimerObjectManager::GetManager()->StopTimer(TimerIndex);
     }
 }

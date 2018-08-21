@@ -1,15 +1,21 @@
 #include <Arduino.h>
 #include <Servo.h>
+#include <StandardCplusplus.h>
+#include <map>
+
 #include "TimerObjectManager.h"
+
+#define MAX_SERVO_POSITION  180
 
 class MyServo : public Servo
 {
     public:
 
-    enum class MoveSpeed{
-        FAST,
-        NORMAL,
-        SLOW
+    enum MoveSpeed{
+        FAST = 0,
+        NORMAL = 1,
+        SLOW = 2,
+        INVALID
     };
 
     MyServo();
@@ -22,6 +28,6 @@ class MyServo : public Servo
 
     private:
         uint8_t TimerIndex;
-        uint8_t GetMoveDelay(MoveSpeed);
         void DelayExpired();
+        static const uint8_t DelayTime[INVALID];
 };
