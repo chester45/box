@@ -24,6 +24,7 @@ class MyServo : public Servo
     void write(int value);
     void WriteDelay(int value);
     void Move(int Position, MoveSpeed Speed);
+    int GetCurrentPosition() {return CurrentPosition;};
 
     private:
         void Step();
