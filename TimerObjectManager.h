@@ -14,6 +14,7 @@ class TimerObjectManager
         uint8_t CreateTimer(unsigned long int DelayMs, void *Param, TimerCallback_t Callback, bool IsSingle);
         bool StartTimer(uint8_t TimerIndex);
         bool StopTimer(uint8_t TimerIndex);
+        bool SetInterval(uint8_t TimerIndex, uint32_t Interval);
         bool DestroyTimer(uint8_t TimerIndex);
 
         void UpdateTimers();

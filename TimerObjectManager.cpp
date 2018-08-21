@@ -103,3 +103,13 @@ bool TimerObjectManager::IsValidTimerIndex(uint8_t Index)
     }
     return false;
 }
+
+bool TimerObjectManager::SetInterval(uint8_t TimerIndex, uint32_t Interval)
+{
+    if (IsValidTimerIndex(TimerIndex))
+    {
+        TimersArray[TimerIndex]->setInterval(Interval);
+        return true;
+    }
+    return false;
+}
