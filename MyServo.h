@@ -24,10 +24,8 @@ class MyServo : public Servo
     void write(int value);
     void WriteDelay(int value);
     void Move(int Position, MoveSpeed Speed);
-    friend void ServoTimerCallback(void *);
 
     private:
-        uint8_t TimerIndex;
-        void DelayExpired();
-        static const uint8_t DelayTime[INVALID];
+        void Step();
+        static const uint8_t DelayLUT[INVALID];
 };

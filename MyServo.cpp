@@ -3,22 +3,11 @@
 #include "TimerObjectManager.h"
 #include "log.h"
 
-const uint8_t MyServo::DelayTime[MoveSpeed::INVALID] = {0, 25, 50};
-
-void ServoTimerCallback(void *Param)
-{
-    MyServo *Servo_p = static_cast<MyServo*>(Param);
-    Servo_p->DelayExpired();
-}
+const uint8_t MyServo::DelayLUT[MoveSpeed::INVALID] = {0, 25, 50};
 
 MyServo::MyServo()
 {
     Servo();
-    TimerIndex = TimerObjectManager::GetManager()->CreateTimer(0, this, ServoTimerCallback, false);
-    if (TimerIndex == INVALID_TIMER_IDX)
-    {
-        LOG("Failed to create Servo timer !");
-    }
 }
 
 void MyServo::write(int value)
@@ -44,32 +33,30 @@ void MyServo::Move(int Position, MoveSpeed Speed)
     }
 
     NewPostion = (Position > MAX_SERVO_POSITION) ? MAX_SERVO_POSITION : Position;
-    uint8_t delay = DelayTime[Speed];
-    if (!delay)
+    uint8_t DelayTime = DelayLUT[Speed];
+    if (!DelayTime)
     {   // Deley is 0, so set servo postion immediately
         write(NewPostion);
     }
     else
     {
-        // Starting timer to get slower but smooth servo movement
-        TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
-        TimerManager->SetInterval(TimerIndex, delay);
-        TimerManager->StartTimer(TimerIndex);
+        while(NewPostion != CurrentPosition)
+        {
+            Step();
+            delay(DelayTime);
+        }
     }
 }
 
-void MyServo::DelayExpired()
+void MyServo::Step()
 {
     if (NewPostion > CurrentPosition)
     {
         write(++CurrentPosition);
     }
-    else if (NewPostion > CurrentPosition)
+    else if (NewPostion < CurrentPosition)
     {
         write(--CurrentPosition);
     }
-    else
-    { //Servo has reached its postion so stop the timer
-        TimerObjectManager::GetManager()->StopTimer(TimerIndex);
-    }
+    LOG("Current Servo position %d", CurrentPosition); // TODO: remove this line
 }
