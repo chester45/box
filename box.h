@@ -20,15 +20,8 @@ namespace Box
 {
 class Box {
 
-private:
-    enum class BoxState {
-        IDLE,
-        WAIT,
-        SWITCH_CHANGE,
-        IN_ACTION
-    };
-
-    enum MoveSpeed{
+public:
+    enum MoveSpeed_t{
         IMMEDIATE = 0,
         FAST = 1,
         NORMAL = 2,
@@ -36,18 +29,28 @@ private:
         INVALID
     };
 
+    enum BoxState_t {
+        STATE_IDLE,
+        STATE_WAIT,
+        STATE_SWITCH_CHANGE,
+        STATE_IN_ACTION
+    };
+
+private:
+
     static const uint8_t SpeedLUT[INVALID];
-    uint8_t UserSwitchPin;
-    uint8_t CoverServoPin;
-    uint8_t StickServoPin;
-    MyServo CoverServo;
-    MyServo StickServo;
-    BoxState state;
-    void SetState(const BoxState new_state) {state = new_state;}
-    void MoveServo(MyServo &Servo, uint8_t Position, MoveSpeed Speed);
+    uint8_t userSwitchPin;
+    uint8_t coverServoPin;
+    uint8_t stickServoPin;
+    MyServo coverServo;
+    MyServo stickServo;
+    BoxState_t state;
+    void SetState(const BoxState_t newState) {state = newState;}
+    void MoveServo(MyServo &servo, uint8_t position, MoveSpeed_t speed);
 
 public:
-    Box(uint8_t SwitchPin, uint8_t CoverServoPin, uint8_t StickServoPin);
+
+    Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t stickServoPin);
     void timerDelayCallback();
     void timerSwitchPwmCallback();
     void Setup();

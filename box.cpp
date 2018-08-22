@@ -10,38 +10,38 @@ namespace Box
 
 const uint8_t Box::SpeedLUT[INVALID] = {0, 5, 25, 50};
 
-Box::Box(uint8_t SwitchPin, uint8_t CoverServoPin, uint8_t StickServoPin)
+Box::Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t stickServoPin)
 {
-    state = BoxState::IDLE;
-    UserSwitchPin = SwitchPin;
-    this->CoverServoPin = CoverServoPin;
-    this->StickServoPin = StickServoPin;
+    state = STATE_IDLE;
+    userSwitchPin = switchPin;
+    this->coverServoPin = coverServoPin;
+    this->stickServoPin = stickServoPin;
     Setup();
 }
 
 void Box::Setup()
 {
-    pinMode(UserSwitchPin, INPUT_PULLUP);
-    CoverServo.attach(CoverServoPin);
-    StickServo.attach(StickServoPin);
-    CoverServo.WriteDelay(0);
-    StickServo.WriteDelay(0);
+    pinMode(userSwitchPin, INPUT_PULLUP);
+    coverServo.attach(coverServoPin);
+    stickServo.attach(stickServoPin);
+    coverServo.WriteDelay(0);
+    stickServo.WriteDelay(0);
 }
 
 void Box::Check()
 {
-    uint8_t pin_state = digitalRead(UserSwitchPin);
+    uint8_t pinState = digitalRead(userSwitchPin);
 
     switch (state)
     {
-        case BoxState::IDLE:
-            if (!pin_state)
+        case STATE_IDLE:
+            if (!pinState)
             {
                 //SetState(BoxState::WAIT);
             }
         break;
-        case BoxState::WAIT:
-            if (!pin_state)
+        case STATE_WAIT:
+            if (!pinState)
             {}
         break;
         default:
@@ -51,24 +51,24 @@ void Box::Check()
 
 bool Box::IsIdle() const
 {
-    return (state == BoxState::IDLE);
+    return (state == STATE_IDLE);
 }
 
 uint8_t Box::GetSwitchPin() const
 {
-    return UserSwitchPin;
+    return userSwitchPin;
 }
 
-void Box::MoveServo(MyServo &Servo, uint8_t NewPosition, MoveSpeed Speed)
+void Box::MoveServo(MyServo &servo, uint8_t newPosition, MoveSpeed_t speed)
 {
-    uint8_t DelayTime = SpeedLUT[Speed];
-    uint8_t CurrentPosition = Servo.GetCurrentPosition();
+    uint8_t delayTime = SpeedLUT[speed];
+    uint8_t currentPosition = servo.GetCurrentPosition();
 
-    while(CurrentPosition != NewPosition)
+    while(currentPosition != newPosition)
     {
-        (CurrentPosition > NewPosition) ? CurrentPosition-- : CurrentPosition++;
-        Servo.write(CurrentPosition);
-        delay(DelayTime);
+        (currentPosition > newPosition) ? currentPosition-- : currentPosition++;
+        servo.write(currentPosition);
+        delay(delayTime);
     }
 }
 
