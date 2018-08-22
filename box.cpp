@@ -8,6 +8,8 @@ namespace Box
 #define BOX_DELAY (2000) // 2 sec
 #define PWM_DELAY (1000) // 1 sec
 
+const uint8_t Box::SpeedLUT[INVALID] = {0, 5, 25, 50};
+
 Box::Box(uint8_t SwitchPin, uint8_t CoverServoPin, uint8_t StickServoPin)
 {
     state = BoxState::IDLE;
@@ -55,6 +57,19 @@ bool Box::IsIdle() const
 uint8_t Box::GetSwitchPin() const
 {
     return UserSwitchPin;
+}
+
+void Box::MoveServo(MyServo &Servo, uint8_t NewPosition, MoveSpeed Speed)
+{
+    uint8_t DelayTime = SpeedLUT[Speed];
+    uint8_t CurrentPosition = Servo.GetCurrentPosition();
+
+    while(CurrentPosition != NewPosition)
+    {
+        (CurrentPosition > NewPosition) ? CurrentPosition-- : CurrentPosition++;
+        Servo.write(CurrentPosition);
+        delay(DelayTime);
+    }
 }
 
 }

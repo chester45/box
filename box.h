@@ -28,7 +28,15 @@ private:
         IN_ACTION
     };
 
+    enum MoveSpeed{
+        IMMEDIATE = 0,
+        FAST = 1,
+        NORMAL = 2,
+        SLOW = 3,
+        INVALID
+    };
 
+    static const uint8_t SpeedLUT[INVALID];
     uint8_t UserSwitchPin;
     uint8_t CoverServoPin;
     uint8_t StickServoPin;
@@ -36,6 +44,7 @@ private:
     MyServo StickServo;
     BoxState state;
     void SetState(const BoxState new_state) {state = new_state;}
+    void MoveServo(MyServo &Servo, uint8_t Position, MoveSpeed Speed);
 
 public:
     Box(uint8_t SwitchPin, uint8_t CoverServoPin, uint8_t StickServoPin);
