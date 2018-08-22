@@ -10,8 +10,8 @@ MyServo::MyServo()
 
 void MyServo::write(int value)
 {
-    CurrentPosition = (value <= MAX_SERVO_POSITION) ? value : MAX_SERVO_POSITION;
-    Servo::write(CurrentPosition);
+    currentPosition = (value <= MAX_SERVO_POSITION) ? value : MAX_SERVO_POSITION;
+    Servo::write(currentPosition);
 }
 
 void MyServo::WriteDelay(int value)

@@ -14,9 +14,9 @@ class MyServo : public Servo
     MyServo();
     void write(int value);
     void WriteDelay(int value);
-    int GetCurrentPosition() {return CurrentPosition;};
+    int GetCurrentPosition() {return currentPosition;};
 
     private:
-        int CurrentPosition;
+        int currentPosition;
 
 };
