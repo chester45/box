@@ -2,7 +2,7 @@
 #define BOX_H_
 
 #include <stdint.h>
-#include "MyServo.h"
+#include <Servo.h>
 #include "TimerObject.h"
 
 #define SRV_COVER   1
@@ -16,19 +16,38 @@
 
 //On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
 
+enum MoveSpeed_t {
+    IMMEDIATE = 0,
+    FAST = 1,
+    NORMAL = 2,
+    SLOW = 3,
+    INVALID
+};
+
+typedef struct {
+    uint8_t move_1;
+    uint8_t speed_1;
+    uint8_t move_2;
+    uint8_t speed_2;
+    uint8_t repeat;
+} ServoSequence_t;
+
+typedef struct {
+    uint8_t move;
+    uint8_t speed;
+} Movement_t;
+
+typedef struct {
+    uint8_t move_cnt;
+    uint8_t repeat;
+    Movement_t moves[2];
+} Sequence_t;
+
 namespace Box
 {
 class Box {
 
 public:
-    enum MoveSpeed_t{
-        IMMEDIATE = 0,
-        FAST = 1,
-        NORMAL = 2,
-        SLOW = 3,
-        INVALID
-    };
-
     enum BoxState_t {
         STATE_IDLE,
         STATE_WAIT,
@@ -42,11 +61,11 @@ private:
     uint8_t userSwitchPin;
     uint8_t coverServoPin;
     uint8_t stickServoPin;
-    MyServo coverServo;
-    MyServo stickServo;
+    Servo coverServo;
+    Servo stickServo;
     BoxState_t state;
     void SetState(const BoxState_t newState) {state = newState;}
-    void MoveServo(MyServo &servo, uint8_t position, MoveSpeed_t speed);
+    void MoveServo(Servo &servo, uint8_t position, MoveSpeed_t speed);
 
 public:
 

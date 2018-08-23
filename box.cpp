@@ -24,8 +24,8 @@ void Box::Setup()
     pinMode(userSwitchPin, INPUT_PULLUP);
     coverServo.attach(coverServoPin);
     stickServo.attach(stickServoPin);
-    coverServo.WriteDelay(0);
-    stickServo.WriteDelay(0);
+    coverServo.write(0);
+    stickServo.write(0);
 }
 
 void Box::Check()
@@ -42,7 +42,9 @@ void Box::Check()
         break;
         case STATE_WAIT:
             if (!pinState)
-            {}
+            {
+
+            }
         break;
         default:
             break;
@@ -59,10 +61,10 @@ uint8_t Box::GetSwitchPin() const
     return userSwitchPin;
 }
 
-void Box::MoveServo(MyServo &servo, uint8_t newPosition, MoveSpeed_t speed)
+void Box::MoveServo(Servo &servo, uint8_t newPosition, MoveSpeed_t speed)
 {
     uint8_t delayTime = SpeedLUT[speed];
-    uint8_t currentPosition = servo.GetCurrentPosition();
+    uint8_t currentPosition = servo.read();
 
     while(currentPosition != newPosition)
     {
