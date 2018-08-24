@@ -14,7 +14,7 @@
 #define LED_TOGGLE(pin) digitalWrite(pin, !digitalRead(pin))
 
 TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
-Box::Box box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_STICK_SERVO_PIN);
+Box::Box box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_ARM_SERVO_PIN);
 uint8_t StatusLedTimerIdx = INVALID_TIMER_IDX;
 
 static void write_log(char *buf)

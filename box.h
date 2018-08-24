@@ -10,9 +10,9 @@
 #define LED_SWITCH  3
 #define LED_AMBIENT 4
 
-#define DEFAULT_USER_SWITCH         2
-#define DEFAULT_COVER_SERVO_PIN     9
-#define DEFAULT_STICK_SERVO_PIN     10
+#define DEFAULT_USER_SWITCH             2
+#define DEFAULT_COVER_SERVO_PIN         9
+#define DEFAULT_ARM_SERVO_PIN       10
 
 //On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
 
@@ -60,16 +60,19 @@ private:
     static const uint8_t SpeedLUT[INVALID];
     uint8_t userSwitchPin;
     uint8_t coverServoPin;
-    uint8_t stickServoPin;
+    uint8_t armServoPin;
     Servo coverServo;
-    Servo stickServo;
+    Servo armServo;
     BoxState_t state;
     void SetState(const BoxState_t newState) {state = newState;}
     void MoveServo(Servo &servo, uint8_t position, MoveSpeed_t speed);
+    void RunNormalSequence();
+    void RunFastSequence();
+    void RunSlowSequence();
 
 public:
 
-    Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t stickServoPin);
+    Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin);
     void timerDelayCallback();
     void timerSwitchPwmCallback();
     void Setup();
