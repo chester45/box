@@ -13,6 +13,11 @@
 #define LED_SET(pin)    digitalWrite(pin, 1)
 #define LED_TOGGLE(pin) digitalWrite(pin, !digitalRead(pin))
 
+#define DBG_CMD
+#define DBG_PARAM_1
+#define DBG_PARAM_2
+#define DBG_PARAM_3
+
 TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
 Box::Box box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_ARM_SERVO_PIN);
 uint8_t StatusLedTimerIdx = INVALID_TIMER_IDX;
@@ -65,10 +70,13 @@ void setup()
 
 void loop()
 {
-    box.Check();
-    TimerManager->UpdateTimers();
-    sleepSetup();
-    LOG("Active again !\n");
+    if (!DebugModeEnabled)
+    {
+        box.Check();
+        TimerManager->UpdateTimers();
+        sleepSetup();
+        LOG("Active again !\n");
+    }
 }
 
 typedef void (*CmdFunc_t)(void);
@@ -89,9 +97,14 @@ typedef struct
 String cmdString;
 Command_t debugCmd;
 
+void ExecuteDebugCmd(void);
+
 DebugCommand_t debugCmdTable [] =
 {
     // must always be last
+    {'d', ExecuteDebugCmd},
+    {'s', ExecuteMoveServoCmd},
+    {'g', ExecuteGetServoPosCmd},
     {' ', NULL}
 };
 
@@ -178,4 +191,47 @@ void serialEvent()
         cmdString += inChar;
     }
   }
+}
+
+void ExecuteDebugCmd()
+{
+    if (debugCmd.params[0] == 1)
+    {
+        LOG("[DBG] Debug mode enabled\n");
+        DebugModeEnabled = 1;
+    }
+    else if (debugCmd.params[0] == 0)
+    {
+        LOG("[DBG] Debug mode enabled\n");
+        DebugModeEnabled = 1;
+    }
+    else
+    {
+        LogInvalidParams();
+    }
+}
+
+void ExecuteMoveServoCmd()
+{
+        if (debugCmd.params[0] > 1 || debugCmd.params[1] > 180 || debugCmd.params[2] > SLOW)
+        {
+            LogInvalidParams();
+        }
+        else
+        {
+            box.DebugMoveServo(debugCmd.params[0], debugCmd.params[1], (MoveSpeed_t)debugCmd.params[2]);
+        }
+}
+
+void ExecuteGetServoPosCmd()
+{
+    if (debugCmd.params[0] > 1)
+    {
+        LogInvalidParams();
+    }
+    else
+    {
+        uint8_t pos = box.DebugGetServoPosition(debugCmd.params[0]);
+        LOG("[DBG] Srv: %d, Pos: %d", debugCmd.params[0], pos);
+    }
 }

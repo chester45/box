@@ -12,7 +12,7 @@
 
 #define DEFAULT_USER_SWITCH             2
 #define DEFAULT_COVER_SERVO_PIN         9
-#define DEFAULT_ARM_SERVO_PIN       10
+#define DEFAULT_ARM_SERVO_PIN           10
 
 //On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
 
@@ -79,6 +79,8 @@ public:
     void Check();
     bool IsIdle() const;
     uint8_t GetSwitchPin() const;
+    void DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed);
+    uint8_t DebugGetServoPosition(uint8_t servoNum);
 };
 }
 

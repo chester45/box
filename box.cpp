@@ -27,7 +27,6 @@
 #define ARM_HIDE_SLOW()                 MOVE_ARM(ARM_HIDE_POSITION, SLOW)
 
 
-
 namespace Box
 {
 
@@ -100,6 +99,18 @@ void Box::MoveServo(Servo &servo, uint8_t newPosition, MoveSpeed_t speed)
         servo.write(currentPosition);
         delay(delayTime);
     }
+}
+
+void Box::DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed)
+{
+    Servo &srv = (!servoNum) ? coverServo : armServo;
+    MoveServo(srv, position, speed);
+}
+
+uint8_t Box::DebugGetServoPosition(uint8_t servoNum)
+{
+    Servo &srv = (!servoNum) ? coverServo : armServo;
+    return (srv.read());
 }
 
 void Box::RunNormalSequence()
