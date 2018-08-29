@@ -1,6 +1,8 @@
 #include "TimerObjectManager.h"
 #include "log.h"
 
+DEFINE_DEBUG_TAG("[TOM]");
+
 TimerObjectManager* TimerObjectManager::Instance = NULL;
 
 TimerObjectManager* TimerObjectManager::GetManager()

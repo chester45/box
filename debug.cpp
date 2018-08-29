@@ -3,6 +3,8 @@
 #include "box.h"
 #include "log.h"
 
+DEFINE_DEBUG_TAG("[DBG]");
+
 /**Local definitions**/
 static void ResetCommandInfo(void);
 static void LogInvalidParams(void);

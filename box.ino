@@ -6,6 +6,8 @@
 #include "TimerObjectManager.h"
 #include "debug.h"
 
+DEFINE_DEBUG_TAG("[INO]");
+
 #define STATUS_LED_PIN  (13)
 
 #define UNUSED_PARAM(x) (void)(x);

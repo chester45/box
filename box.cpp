@@ -30,6 +30,8 @@
 namespace Box
 {
 
+DEFINE_DEBUG_TAG("[BOX]");
+
 #define BOX_DELAY (2000) // 2 sec
 #define PWM_DELAY (1000) // 1 sec
 
