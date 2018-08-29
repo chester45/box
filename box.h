@@ -47,14 +47,6 @@ namespace Box
 {
 class Box {
 
-public:
-    enum BoxState_t {
-        STATE_IDLE,
-        STATE_WAIT,
-        STATE_SWITCH_CHANGE,
-        STATE_IN_ACTION
-    };
-
 private:
 
     static const uint8_t SpeedLUT[INVALID];
@@ -63,12 +55,19 @@ private:
     uint8_t armServoPin;
     Servo coverServo;
     Servo armServo;
-    BoxState_t state;
-    void SetState(const BoxState_t newState) {state = newState;}
+    uint8_t coolDownTimer;
+    uint8_t angryLevel;
+
+    void TriggerAction();
     void MoveServo(Servo &servo, uint8_t position, MoveSpeed_t speed);
+    void CoolDownEvent();
+    void IncreaseAngryLevel();
+    void DecreaseAngryLevel();
     void RunNormalSequence();
     void RunFastSequence();
     void RunSlowSequence();
+
+    friend void CoolDownTimerCallback(void*);
 
 public:
 

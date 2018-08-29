@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Box.h"
+#include "TimerObjectManager.h"
 #include "log.h"
 
 #define COVER_OPEN_POSITION             75
@@ -32,17 +33,24 @@ namespace Box
 
 DEFINE_DEBUG_TAG("[BOX]");
 
-#define BOX_DELAY (2000) // 2 sec
-#define PWM_DELAY (1000) // 1 sec
+#define BOX_DELAY       (2000) // 2 sec
+#define PWM_DELAY       (1000) // 1 sec
+#define COOL_DOWN_DELAY (1000)    // 1sec
 
 const uint8_t Box::SpeedLUT[INVALID] = {0, 5, 25, 50};
 
+void CoolDownTimerCallback(void*);
+
 Box::Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin)
 {
-    state = STATE_IDLE;
     userSwitchPin = switchPin;
     this->coverServoPin = coverServoPin;
     this->armServoPin = armServoPin;
+    angryLevel = 0;
+    coolDownTimer = TimerObjectManager::GetManager()->CreateTimer(COOL_DOWN_DELAY,
+                                                                  this,
+                                                                  CoolDownTimerCallback,
+                                                                  false);
     Setup();
 }
 
@@ -59,30 +67,18 @@ void Box::Check()
 {
     uint8_t pinState = digitalRead(userSwitchPin);
 
-    switch (state)
-    {
-        case STATE_IDLE:
-            if (!pinState)
-            {
-                RunNormalSequence();
-                RunFastSequence();
-                RunSlowSequence();
-            }
-        break;
-        case STATE_WAIT:
-            if (!pinState)
-            {
+    if (!pinState)
+        TriggerAction();
+}
 
-            }
-        break;
-        default:
-            break;
-    }
+void Box::TriggerAction()
+{
+    IncreaseAngryLevel();
 }
 
 bool Box::IsIdle() const
 {
-    return (state == STATE_IDLE);
+    return ((angryLevel) ? true : false);
 }
 
 uint8_t Box::GetSwitchPin() const
@@ -101,6 +97,23 @@ void Box::MoveServo(Servo &servo, uint8_t newPosition, MoveSpeed_t speed)
         servo.write(currentPosition);
         delay(delayTime);
     }
+}
+
+void Box::CoolDownEvent()
+{
+
+}
+
+void Box::IncreaseAngryLevel()
+{
+     if (angryLevel < 255)
+        angryLevel++ ;
+}
+
+void Box::DecreaseAngryLevel()
+{
+     if (angryLevel)
+        angryLevel-- ;
 }
 
 void Box::DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed)
@@ -137,6 +150,12 @@ void Box::RunSlowSequence()
     ARM_FULL_EXTEND_SLOW();
     ARM_HIDE_SLOW();
     COVER_CLOSE_SLOW();
+}
+
+void CoolDownTimerCallback(void *param)
+{
+    Box *obj = static_cast<Box*>(param);
+    obj->CoolDownEvent();
 }
 
 }
