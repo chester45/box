@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/wdt.h>
 #include "debug.h"
 #include "box.h"
 #include "log.h"
@@ -14,18 +15,22 @@ static void ExecuteHelpCmd(void);
 static void ExecuteDebugCmd(void);
 static void ExecuteMoveServoCmd(void);
 static void ExecuteGetServoPosCmd(void);
+static void ExecuteResetCmd(void);
 
 static Box::Box *box_p = NULL;
 static bool DebugModeEnabled = false;
 String cmdString;
 Command_t debugCmd;
 
+void (*ResetFunc)(void) = 0;
+
 DebugCommand_t debugCmdTable [] =
 {
-    {'h', ExecuteHelpCmd,       "Print help: h"},
-    {'d', ExecuteDebugCmd,      "Enable debug mode: d [0/1]"},
-    {'s', ExecuteMoveServoCmd,  "Set servo position: s [srv_num] [pos] [speed]"},
+    {'h', ExecuteHelpCmd,        "Print help: h"},
+    {'d', ExecuteDebugCmd,       "Enable debug mode: d [0/1]"},
+    {'s', ExecuteMoveServoCmd,   "Set servo position: s [srv_num] [pos] [speed]"},
     {'g', ExecuteGetServoPosCmd, "Get servo postiion: s [srv_num]"},
+    {'r', ExecuteResetCmd,       "Reset the device: r [1]"},
     // must always be last
     {' ', NULL, NULL}
 };
@@ -89,7 +94,6 @@ static void LogInvalidParams()
 
 static void ParseCommand()
 {
-    LOG("Parsing: %s", cmdString.c_str());
     if (cmdString.length() < 3)
     {
         LOG("Wrong length: %d\n", cmdString.length());
@@ -102,18 +106,15 @@ static void ParseCommand()
     for (uint8_t i = 0; i < 3; i ++)
     {
         int paramEndIdx = cmdString.indexOf(" ", paramStartIdx);
-        LOG("Space at idx: %d\n", paramEndIdx);
         if (paramEndIdx == -1)
         {   // This is last parameter
             debugCmd.validParams++;
-            LOG("\tExtracting last param %d\n", debugCmd.validParams);
             debugCmd.params[i] = cmdString.substring(paramStartIdx).toInt();
             break;
         }
         else
         {
             debugCmd.validParams++;
-            LOG("\tExtracting param %d from (%d, %d)\n", debugCmd.validParams, paramStartIdx, paramEndIdx);
             debugCmd.params[i] = cmdString.substring(paramStartIdx, paramEndIdx).toInt();
             paramStartIdx = paramEndIdx + 1;
         }
@@ -121,6 +122,7 @@ static void ParseCommand()
     ExecuteCommand();
 }
 
+/*
 static void PrintCommand()
 {
     LOG("Command: %c, %d, %d, %d, %d\n", debugCmd.cmd,
@@ -129,12 +131,12 @@ static void PrintCommand()
                                          debugCmd.params[1],
                                          debugCmd.params[2]);
 }
+*/
 
 static void ExecuteCommand()
 {
     uint8_t idx = 0;
     bool cmdFound = false;
-    PrintCommand();
     while (debugCmdTable[idx].cmd != ' ')
     {
         if (debugCmd.cmd == debugCmdTable[idx].cmd)
@@ -182,7 +184,7 @@ static void ExecuteDebugCmd(void)
     else if (debugCmd.params[0] == 0)
     {
         LOG("Debug mode disabled\n");
-        DebugModeEnabled = 1;
+        DebugModeEnabled = 0;
     }
     else
     {
@@ -215,3 +217,21 @@ static void ExecuteGetServoPosCmd()
     }
 }
 
+static void ExecuteResetCmd()
+{
+    if (debugCmd.params[0] != 1)
+    {
+        LogInvalidParams();
+        return;
+    }
+
+    LOG("Resetting platform ... \n");
+
+    // watchdog does not work with nano - some bootloader issues
+    //wdt_enable(WDTO_1S);
+
+    delay(3000);
+    ResetFunc();
+
+    LOG("Fail to reset ! \n");
+}

@@ -1,6 +1,7 @@
 #include <avr/sleep.h>
 #include <Arduino.h>
 #include <Servo.h>
+#include <avr/wdt.h>
 #include "Box.h"
 #include "log.h"
 #include "TimerObjectManager.h"
@@ -25,6 +26,16 @@ TimerObjectManager *TimerManager = TimerObjectManager::GetManager();
 Box::Box box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_ARM_SERVO_PIN);
 uint8_t StatusLedTimerIdx = INVALID_TIMER_IDX;
 
+
+static void IndicateStart()
+{
+    uint8_t cnt = 6;
+    while (cnt--)
+    {
+        LED_TOGGLE(STATUS_LED_PIN);
+        delay(250);
+    }
+}
 
 static void write_log(char *buf)
 {
@@ -59,6 +70,7 @@ static void sleepSetup()
 
 void setup()
 {
+    wdt_disable();
     Serial.begin(9600);
     log_initialize(write_log);
     InitDebugModule(&box);
@@ -67,6 +79,7 @@ void setup()
     StatusLedTimerIdx = TimerManager->CreateTimer(1000, NULL, StatusLedTimerCallback, false);
     if (StatusLedTimerIdx != INVALID_TIMER_IDX)
     {
+        IndicateStart();
         TimerManager->StartTimer(StatusLedTimerIdx);
     }
 }
@@ -77,8 +90,8 @@ void loop()
     {
         box.Check();
         TimerManager->UpdateTimers();
-        sleepSetup();
-        LOG("Active again !\n");
+        //sleepSetup();
+        //LOG("Active again !\n");
     }
 }
 
