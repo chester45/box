@@ -36,7 +36,7 @@ void InitDebugModule(Box::Box *box)
 {
     if (!box)
     {
-        LOG("[DBG] Failed to init debug module");
+        LOG("Failed to init debug module\n");
         return;
     }
     ResetCommandInfo();
@@ -74,7 +74,7 @@ static void ResetCommandInfo()
 {
     cmdString.remove(0);
     debugCmd.cmd = ' ';
-    debugCmd.validParams ++;
+    debugCmd.validParams = 0;
     debugCmd.params[0] = 0;
     debugCmd.params[1] = 0;
     debugCmd.params[2] = 0;
@@ -82,31 +82,36 @@ static void ResetCommandInfo()
 
 static void LogInvalidParams()
 {
-    LOG("[DBG] Invalid cmd params: %d %d %d", debugCmd.params[0], debugCmd.params[1], debugCmd.params[0]);
+    LOG("Invalid cmd params: %d %d %d\n", debugCmd.params[0], debugCmd.params[1], debugCmd.params[0]);
 }
 
 static void ParseCommand()
 {
+    LOG("Parsing: %s", cmdString.c_str());
     if (cmdString.length() < 3)
     {
-        LOG("[DBG] Wrong length: %d\n", cmdString.length());
+        LOG("Wrong length: %d\n", cmdString.length());
         return;
     }
 
     debugCmd.cmd = cmdString[0];
-    int paramStartIdx = 3;
+    int paramStartIdx = 2;
 
     for (uint8_t i = 0; i < 3; i ++)
     {
         int paramEndIdx = cmdString.indexOf(" ", paramStartIdx);
-        debugCmd.validParams++;
+        LOG("Space at idx: %d\n", paramEndIdx);
         if (paramEndIdx == -1)
         {   // This is last parameter
+            debugCmd.validParams++;
+            LOG("\tExtracting last param %d\n", debugCmd.validParams);
             debugCmd.params[i] = cmdString.substring(paramStartIdx).toInt();
             break;
         }
         else
         {
+            debugCmd.validParams++;
+            LOG("\tExtracting param %d from (%d, %d)\n", debugCmd.validParams, paramStartIdx, paramEndIdx);
             debugCmd.params[i] = cmdString.substring(paramStartIdx, paramEndIdx).toInt();
             paramStartIdx = paramEndIdx + 1;
         }
@@ -114,10 +119,20 @@ static void ParseCommand()
     ExecuteCommand();
 }
 
+static void PrintCommand()
+{
+    LOG("Command: %c, %d, %d, %d, %d\n", debugCmd.cmd,
+                                         debugCmd.validParams,
+                                         debugCmd.params[0],
+                                         debugCmd.params[1],
+                                         debugCmd.params[2]);
+}
+
 static void ExecuteCommand()
 {
     uint8_t idx = 0;
     bool cmdFound = false;
+    PrintCommand();
     while (debugCmdTable[idx].cmd != ' ')
     {
         if (debugCmd.cmd == debugCmdTable[idx].cmd)
@@ -133,19 +148,19 @@ static void ExecuteCommand()
     }
 
     if (!cmdFound)
-        LOG("[DBG] Invalid command\n");
+        LOG("Invalid command\n");
 }
 
 static void ExecuteDebugCmd(void)
 {
     if (debugCmd.params[0] == 1)
     {
-        LOG("[DBG] Debug mode enabled\n");
+        LOG("Debug mode enabled\n");
         DebugModeEnabled = 1;
     }
     else if (debugCmd.params[0] == 0)
     {
-        LOG("[DBG] Debug mode enabled\n");
+        LOG("Debug mode disabled\n");
         DebugModeEnabled = 1;
     }
     else
@@ -175,7 +190,7 @@ static void ExecuteGetServoPosCmd()
     else
     {
         uint8_t pos = box_p->DebugGetServoPosition(debugCmd.params[0]);
-        LOG("[DBG] Srv: %d, Pos: %d", debugCmd.params[0], pos);
+        LOG("Srv: %d, Pos: %d\n", debugCmd.params[0], pos);
     }
 }
 
