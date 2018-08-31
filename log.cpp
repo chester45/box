@@ -169,14 +169,16 @@ void log_printf(const char *fmt, ...)
         uint16_t length = 0;
         va_list va;
         va_start(va, fmt);
-        length = ts_formatlength(fmt, va);
+        length = ts_formatlength(fmt, va) + 1;
         va_end(va);
         {
-            char buf[length];
+            char *buf = new char[length];
+            memset(buf, 0x00, length);
             va_start(va, fmt);
             length = ts_formatstring(buf, fmt, va);
             log_func(buf);
             va_end(va);
+            delete[] buf;
         }
     }
 }
@@ -194,19 +196,19 @@ void log_printf_debug(const char *tag, const char *fmt, ...)
     {
         uint16_t fmt_length = 0;
         uint16_t tag_length = strlen(tag);
-        uint16_t msg_start = (tag_length > 0) ? tag_length + 2 : 0;
         va_list va;
         va_start(va, fmt);
-        fmt_length = ts_formatlength(fmt, va);
+        fmt_length = ts_formatlength(fmt, va) + 1; // include extra NULL character
         va_end(va);
         {
-            char buf[tag_length + fmt_length + 1]; // extra char for space between tag and text
+            char *buf = new char[tag_length + fmt_length + 1]; // extra char for space between tag and text
             strcpy(buf, tag);
             buf[tag_length] = ' ';  // add space
             va_start(va, fmt);
-            ts_formatstring((buf + msg_start), fmt, va);
+            ts_formatstring((buf + tag_length + 1), fmt, va);
             log_func(buf);
             va_end(va);
+            delete[] buf;
         }
     }
 }
