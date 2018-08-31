@@ -9,6 +9,7 @@ typedef struct
 {
     char cmd;
     CmdFunc_t execFunc;
+    const char *h_str;
 } DebugCommand_t;
 
 typedef struct

@@ -10,6 +10,7 @@ static void ResetCommandInfo(void);
 static void LogInvalidParams(void);
 static void ParseCommand(void);
 static void ExecuteCommand(void);
+static void ExecuteHelpCmd(void);
 static void ExecuteDebugCmd(void);
 static void ExecuteMoveServoCmd(void);
 static void ExecuteGetServoPosCmd(void);
@@ -21,11 +22,12 @@ Command_t debugCmd;
 
 DebugCommand_t debugCmdTable [] =
 {
-    {'d', ExecuteDebugCmd},
-    {'s', ExecuteMoveServoCmd},
-    {'g', ExecuteGetServoPosCmd},
+    {'h', ExecuteHelpCmd,       "Print help: h"},
+    {'d', ExecuteDebugCmd,      "Enable debug mode: d [0/1]"},
+    {'s', ExecuteMoveServoCmd,  "Set servo position: s [srv_num] [pos] [speed]"},
+    {'g', ExecuteGetServoPosCmd, "Get servo postiion: s [srv_num]"},
     // must always be last
-    {' ', NULL}
+    {' ', NULL, NULL}
 };
 
 /************************************************************************
@@ -149,6 +151,25 @@ static void ExecuteCommand()
 
     if (!cmdFound)
         LOG("Invalid command\n");
+}
+
+static void ExecuteHelpCmd()
+{
+    uint8_t idx = 0;
+    while (debugCmdTable[idx].cmd != ' ')
+    {
+        LOG_BASIC("\t%c", debugCmdTable[idx].cmd);
+        if (debugCmdTable[idx].h_str)
+        {
+            LOG_BASIC(" %s", debugCmdTable[idx].h_str);
+        }
+        else
+        {
+            LOG_BASIC(" no help available");
+        }
+        LOG_BASIC("\n");
+        idx++;
+    }
 }
 
 static void ExecuteDebugCmd(void)
