@@ -43,60 +43,57 @@ void CoolDownTimerCallback(void*);
 
 Box::Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin)
 {
-    userSwitchPin = switchPin;
-    this->coverServoPin = coverServoPin;
-    this->armServoPin = armServoPin;
-    angryLevel = 0;
-    coolDownTimer = TimerObjectManager::GetManager()->CreateTimer(COOL_DOWN_DELAY,
-                                                                  this,
-                                                                  CoolDownTimerCallback,
-                                                                  false);
-    Setup();
+        userSwitchPin = switchPin;
+        this->coverServoPin = coverServoPin;
+        this->armServoPin = armServoPin;
+        angryLevel = 0;
+        coolDownTimer = TimerObjectManager::GetManager()->CreateTimer(COOL_DOWN_DELAY, this,
+                                                                CoolDownTimerCallback, false);
+        Setup();
 }
 
 void Box::Setup()
 {
-    pinMode(userSwitchPin, INPUT_PULLUP);
-    coverServo.attach(coverServoPin);
-    armServo.attach(armServoPin);
-    coverServo.write(0);
-    armServo.write(0);
+        pinMode(userSwitchPin, INPUT_PULLUP);
+        coverServo.attach(coverServoPin);
+        armServo.attach(armServoPin);
+        coverServo.write(0);
+        armServo.write(0);
 }
 
 void Box::Check()
 {
-    uint8_t pinState = digitalRead(userSwitchPin);
+        uint8_t pinState = digitalRead(userSwitchPin);
 
-    if (!pinState)
-        TriggerAction();
+        if (!pinState)
+                TriggerAction();
 }
 
 void Box::TriggerAction()
 {
-    IncreaseAngryLevel();
+        IncreaseAngryLevel();
 }
 
 bool Box::IsIdle() const
 {
-    return ((angryLevel) ? true : false);
+        return ((angryLevel) ? true : false);
 }
 
 uint8_t Box::GetSwitchPin() const
 {
-    return userSwitchPin;
+        return userSwitchPin;
 }
 
 void Box::MoveServo(Servo &servo, uint8_t newPosition, MoveSpeed_t speed)
 {
-    uint8_t delayTime = SpeedLUT[speed];
-    uint8_t currentPosition = servo.read();
+        uint8_t delayTime = SpeedLUT[speed];
+        uint8_t currentPosition = servo.read();
 
-    while(currentPosition != newPosition)
-    {
-        (currentPosition > newPosition) ? currentPosition-- : currentPosition++;
-        servo.write(currentPosition);
-        delay(delayTime);
-    }
+        while(currentPosition != newPosition) {
+                (currentPosition > newPosition) ? currentPosition-- : currentPosition++;
+                servo.write(currentPosition);
+                delay(delayTime);
+        }
 }
 
 void Box::CoolDownEvent()
@@ -106,56 +103,56 @@ void Box::CoolDownEvent()
 
 void Box::IncreaseAngryLevel()
 {
-     if (angryLevel < 255)
-        angryLevel++ ;
+        if (angryLevel < 255)
+                angryLevel++ ;
 }
 
 void Box::DecreaseAngryLevel()
 {
-     if (angryLevel)
-        angryLevel-- ;
+        if (angryLevel)
+                angryLevel-- ;
 }
 
 void Box::DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed)
 {
-    Servo &srv = (!servoNum) ? coverServo : armServo;
-    MoveServo(srv, position, speed);
+        Servo &srv = (!servoNum) ? coverServo : armServo;
+        MoveServo(srv, position, speed);
 }
 
 uint8_t Box::DebugGetServoPosition(uint8_t servoNum)
 {
-    Servo &srv = (!servoNum) ? coverServo : armServo;
-    return (srv.read());
+        Servo &srv = (!servoNum) ? coverServo : armServo;
+        return (srv.read());
 }
 
 void Box::RunNormalSequence()
 {
-    COVER_OPEN_NORMAL();
-    ARM_FULL_EXTEND_NORMAL();
-    ARM_HIDE_NORMAL();
-    COVER_CLOSE_NORMAL();
+        COVER_OPEN_NORMAL();
+        ARM_FULL_EXTEND_NORMAL();
+        ARM_HIDE_NORMAL();
+        COVER_CLOSE_NORMAL();
 }
 
 void Box::RunFastSequence()
 {
-    COVER_OPEN_FAST();
-    ARM_FULL_EXTEND_FAST();
-    ARM_HIDE_FAST();
-    COVER_CLOSE_FAST();
+        COVER_OPEN_FAST();
+        ARM_FULL_EXTEND_FAST();
+        ARM_HIDE_FAST();
+        COVER_CLOSE_FAST();
 }
 
 void Box::RunSlowSequence()
 {
-    COVER_OPEN_SLOW();
-    ARM_FULL_EXTEND_SLOW();
-    ARM_HIDE_SLOW();
-    COVER_CLOSE_SLOW();
+        COVER_OPEN_SLOW();
+        ARM_FULL_EXTEND_SLOW();
+        ARM_HIDE_SLOW();
+        COVER_CLOSE_SLOW();
 }
 
 void CoolDownTimerCallback(void *param)
 {
-    Box *obj = static_cast<Box*>(param);
-    obj->CoolDownEvent();
+        Box *obj = static_cast<Box*>(param);
+        obj->CoolDownEvent();
 }
 
 }
