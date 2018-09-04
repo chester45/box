@@ -22,6 +22,12 @@ static bool DebugModeEnabled = false;
 String cmdString;
 Command_t debugCmd;
 
+#define CMD                     debugCmd.cmd
+#define CMD_VALID_PARAMS        debugCmd.validParams
+#define CMD_PARAM_1             debugCmd.params[0]
+#define CMD_PARAM_2             debugCmd.params[1]
+#define CMD_PARAM_3             debugCmd.params[2]
+
 void (*ResetFunc)(void) = 0;
 
 DebugCommand_t debugCmdTable [] = {
@@ -74,17 +80,16 @@ void FetchDebugCommand(void)
 static void ResetCommandInfo()
 {
         cmdString.remove(0);
-        debugCmd.cmd = ' ';
-        debugCmd.validParams = 0;
-        debugCmd.params[0] = 0;
-        debugCmd.params[1] = 0;
-        debugCmd.params[2] = 0;
+        CMD = ' ';
+        CMD_PARAM_1 = 0;
+        CMD_PARAM_2 = 0;
+        CMD_PARAM_3 = 0;
+        CMD_VALID_PARAMS = 0;
 }
 
 static void LogInvalidParams()
 {
-        LOG("Invalid cmd params: %d %d %d\n", debugCmd.params[0], debugCmd.params[1],
-                                                                        debugCmd.params[0]);
+        LOG("Invalid cmd params: %d %d %d\n", CMD_PARAM_1, CMD_PARAM_2, CMD_PARAM_3);
 }
 
 static void ParseCommand()
@@ -94,17 +99,17 @@ static void ParseCommand()
                 return;
         }
 
-        debugCmd.cmd = cmdString[0];
+        CMD = cmdString[0];
         int paramStartIdx = 2;
 
         for (uint8_t i = 0; i < 3; i ++) {
                 int paramEndIdx = cmdString.indexOf(" ", paramStartIdx);
                 if (paramEndIdx == -1) {   // This is last parameter
-                        debugCmd.validParams++;
+                        CMD_VALID_PARAMS++;
                         debugCmd.params[i] = cmdString.substring(paramStartIdx).toInt();
                         break;
                 } else {
-                        debugCmd.validParams++;
+                        CMD_VALID_PARAMS++;
                         debugCmd.params[i] = cmdString.substring(paramStartIdx, paramEndIdx).toInt();
                         paramStartIdx = paramEndIdx + 1;
                 }
@@ -115,11 +120,11 @@ static void ParseCommand()
 /*
 static void PrintCommand()
 {
-    LOG("Command: %c, %d, %d, %d, %d\n", debugCmd.cmd,
-                                         debugCmd.validParams,
-                                         debugCmd.params[0],
-                                         debugCmd.params[1],
-                                         debugCmd.params[2]);
+    LOG("Command: %c, %d, %d, %d, %d\n", CMD,
+                                         CMD_VALID_PARAMS,
+                                         CMD_PARAM_1,
+                                         CMD_PARAM_2,
+                                         CMD_PARAM_3);
 }
 */
 
@@ -129,7 +134,7 @@ static void ExecuteCommand()
         bool cmdFound = false;
 
         while (debugCmdTable[idx].cmd != ' ') {
-                if (debugCmd.cmd == debugCmdTable[idx].cmd) {
+                if (CMD == debugCmdTable[idx].cmd) {
                         if (debugCmdTable[idx].execFunc != NULL) {
                                 debugCmdTable[idx].execFunc();
                                 cmdFound = true;
@@ -160,10 +165,10 @@ static void ExecuteHelpCmd()
 
 static void ExecuteDebugCmd(void)
 {
-        if (debugCmd.params[0] == 1) {
+        if (CMD_PARAM_1 == 1) {
                 LOG("Debug mode enabled\n");
                 DebugModeEnabled = 1;
-        } else if (debugCmd.params[0] == 0) {
+        } else if (CMD_PARAM_1 == 0) {
                 LOG("Debug mode disabled\n");
                 DebugModeEnabled = 0;
         } else {
@@ -173,27 +178,26 @@ static void ExecuteDebugCmd(void)
 
 static void ExecuteMoveServoCmd()
 {
-        if (debugCmd.params[0] > 1 || debugCmd.params[1] > 180 || debugCmd.params[2] > SLOW) {
+        if (CMD_PARAM_1 > 1 || CMD_PARAM_2 > 180 || CMD_PARAM_3 > SLOW) {
                 LogInvalidParams();
         } else {
-                box_p->DebugMoveServo(debugCmd.params[0], debugCmd.params[1],
-                                                                (MoveSpeed_t)debugCmd.params[2]);
+                box_p->DebugMoveServo(CMD_PARAM_1, CMD_PARAM_2, (MoveSpeed_t)CMD_PARAM_3);
         }
 }
 
 static void ExecuteGetServoPosCmd()
 {
-        if (debugCmd.params[0] > 1) {
+        if (CMD_PARAM_1 > 1) {
                 LogInvalidParams();
         } else {
-                uint8_t pos = box_p->DebugGetServoPosition(debugCmd.params[0]);
-                LOG("Srv: %d, Pos: %d\n", debugCmd.params[0], pos);
+                uint8_t pos = box_p->DebugGetServoPosition(CMD_PARAM_1);
+                LOG("Srv: %d, Pos: %d\n", CMD_PARAM_1, pos);
         }
 }
 
 static void ExecuteResetCmd()
 {
-        if (debugCmd.params[0] != 1) {
+        if (CMD_PARAM_1 != 1) {
                 LogInvalidParams();
                 return;
         }
