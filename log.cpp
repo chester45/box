@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "log.h"
 
-log_func_t log_func = NULL;
+LogFunc_t logFunc = NULL;
 
 /**
 **---------------------------------------------------------------------------
@@ -14,20 +14,22 @@ log_func_t log_func = NULL;
 */
 static void ts_itoa(char **buf, uint16_t d, uint16_t base)
 {
-    uint16_t div = 1;
-    while (d / div >= base)
-        div *= base;
+        uint16_t div = 1;
 
-    while (div != 0)
-    {
-        uint16_t num = d / div;
-        d = d % div;
-        div /= base;
-        if (num > 9)
-            *((*buf)++) = (num - 10) + 'A';
-        else
-            *((*buf)++) = num + '0';
-    }
+        while (d / div >= base) {
+                div *= base;
+        }
+
+        while (div != 0) {
+            uint16_t num = d / div;
+            d = d % div;
+            div /= base;
+            if (num > 9) {
+                    *((*buf)++) = (num - 10) + 'A';
+            } else {
+                    *((*buf)++) = num + '0';
+            }
+        }
 }
 
 /**
@@ -39,59 +41,50 @@ static void ts_itoa(char **buf, uint16_t d, uint16_t base)
 static uint16_t ts_formatstring(char *buf, const char *fmt, va_list va)
 {
     char *start_buf = buf;
-    while (*fmt)
-    {
-        /* Character needs formating? */
-        if (*fmt == '%')
-        {
-            switch (*(++fmt))
-            {
-            case 'c':
-                *buf++ = va_arg(va, uint16_t);
-                break;
-            case 'd':
-            case 'i':
-            {
-                int16_t val = va_arg(va, int16_t);
-                if (val < 0)
-                {
-                    val *= -1;
-                    *buf++ = '-';
-                }
-                ts_itoa(&buf, val, 10);
-            }
-            break;
-            case 's':
-            {
-                char * arg = va_arg(va, char *);
-                while (*arg)
-                {
-                    *buf++ = *arg++;
-                }
-            }
-            break;
-            case 'u':
-                ts_itoa(&buf, va_arg(va, uint16_t), 10);
-                break;
-            case 'x':
-            case 'X':
-                ts_itoa(&buf, va_arg(va, uint16_t), 16);
-                break;
-            case '%':
-                *buf++ = '%';
-                break;
-            }
-            fmt++;
-        }
-        /* Else just copy */
-        else
-        {
-            *buf++ = *fmt++;
-        }
-    }
-    *buf = 0;
 
-    return (uint16_t)(buf - start_buf);
+        while (*fmt) {
+            /* Character needs formating? */
+            if (*fmt == '%') {
+                switch (*(++fmt)) {
+                case 'c':
+                        *buf++ = va_arg(va, uint16_t);
+                        break;
+                case 'd':
+                case 'i': {
+                        int16_t val = va_arg(va, int16_t);
+                        if (val < 0) {
+                                val *= -1;
+                                *buf++ = '-';
+                        }
+                        ts_itoa(&buf, val, 10);
+                        break;
+                }
+                case 's': {
+                        char * arg = va_arg(va, char *);
+                        while (*arg) {
+                                *buf++ = *arg++;
+                        }
+                        break;
+                }
+                case 'u':
+                        ts_itoa(&buf, va_arg(va, uint16_t), 10);
+                        break;
+                case 'x':
+                case 'X':
+                        ts_itoa(&buf, va_arg(va, uint16_t), 16);
+                        break;
+                case '%':
+                        *buf++ = '%';
+                        break;
+                }
+                fmt++;
+            } else {/* Else just copy */
+                    *buf++ = *fmt++;
+            }
+        }
+        *buf = 0;
+
+        return (uint16_t)(buf - start_buf);
 }
 
 /**
@@ -103,83 +96,77 @@ static uint16_t ts_formatstring(char *buf, const char *fmt, va_list va)
 */
 static uint16_t ts_formatlength(const char *fmt, va_list va)
 {
-    uint16_t length = 0;
-    while (*fmt)
-    {
-        if (*fmt == '%')
-        {
-            ++fmt;
-            switch (*fmt)
-            {
-            case 'c':
-                va_arg(va, uint16_t);
-                ++length;
-                break;
-            case 'd':
-            case 'i':
-            case 'u':
-                /* 32 bits integer is max 11 characters with minus sign */
-                length += 11;
-                va_arg(va, uint16_t);
-                break;
-            case 's':
-            {
-                char * str = va_arg(va, char *);
-                while (*str++)
-                    ++length;
-            }
-            break;
-            case 'x':
-            case 'X':
-                /* 32 bits integer as hex is max 8 characters */
-                length += 8;
-                va_arg(va, uint16_t);
-                break;
-            default:
-                ++length;
-                break;
-            }
-        }
-        else
-        {
-            ++length;
-        }
-        ++fmt;
-    }
-    return length;
-}
-
-void log_initialize(const log_func_t func_ptr)
-{
-    log_func = func_ptr;
-}
-
-/**
-**===========================================================================
-**  Abstract: Loads data from the given locations and writes them to the
-**            standard output according to the format parameter.
-**  Returns:  Number of bytes written
-**
-**===========================================================================
-*/
-void log_printf(const char *fmt, ...)
-{
-    if (log_func)
-    {
         uint16_t length = 0;
-        va_list va;
-        va_start(va, fmt);
-        length = ts_formatlength(fmt, va) + 1;
-        va_end(va);
-        {
-            char *buf = new char[length];
-            memset(buf, 0x00, length);
-            va_start(va, fmt);
-            length = ts_formatstring(buf, fmt, va);
-            log_func(buf);
-            va_end(va);
-            delete[] buf;
+        while (*fmt) {
+                if (*fmt == '%') {
+                ++fmt;
+                        switch (*fmt)
+                        {
+                        case 'c':
+                                va_arg(va, uint16_t);
+                                ++length;
+                                break;
+                        case 'd':
+                        case 'i':
+                        case 'u':
+                                /* 32 bits integer is max 11 characters with minus sign */
+                                length += 11;
+                                va_arg(va, uint16_t);
+                                break;
+                        case 's': {
+                                char * str = va_arg(va, char *);
+                                while (*str++)
+                                ++length;
+                                break;
+                        }
+                        case 'x':
+                        case 'X':
+                                /* 32 bits integer as hex is max 8 characters */
+                                length += 8;
+                                va_arg(va, uint16_t);
+                                break;
+                        default:
+                                ++length;
+                                break;
+                        }
+                } else {
+                        ++length;
+                }
+                ++fmt;
         }
+        return length;
+}
+
+void LogInitialize(const LogFunc_t funcPtr)
+{
+        logFunc = funcPtr;
+}
+
+/**
+**===========================================================================
+**  Abstract: Loads data from the given locations and writes them to the
+**            standard output according to the format parameter.
+**  Returns:  Number of bytes written
+**
+**===========================================================================
+*/
+void LogPrintf(const char *fmt, ...)
+{
+    if (logFunc) {
+            uint16_t length = 0;
+            va_list va;
+            va_start(va, fmt);
+            length = ts_formatlength(fmt, va) + 1;
+            va_end(va);
+            {
+                    char *buf = new char[length];
+                    memset(buf, 0x00, length);
+                    va_start(va, fmt);
+                    length = ts_formatstring(buf, fmt, va);
+                    logFunc(buf);
+                    va_end(va);
+                    delete[] buf;
+            }
     }
 }
 /**
@@ -190,25 +177,24 @@ void log_printf(const char *fmt, ...)
 **
 **===========================================================================
 */
-void log_printf_debug(const char *tag, const char *fmt, ...)
+void LogPrintfDebug(const char *tag, const char *fmt, ...)
 {
-    if (log_func)
-    {
-        uint16_t fmt_length = 0;
-        uint16_t tag_length = strlen(tag);
-        va_list va;
-        va_start(va, fmt);
-        fmt_length = ts_formatlength(fmt, va) + 1; // include extra NULL character
-        va_end(va);
-        {
-            char *buf = new char[tag_length + fmt_length + 1]; // extra char for space between tag and text
-            strcpy(buf, tag);
-            buf[tag_length] = ' ';  // add space
+    if (logFunc) {
+            uint16_t fmt_length = 0;
+            uint16_t tag_length = strlen(tag);
+            va_list va;
             va_start(va, fmt);
-            ts_formatstring((buf + tag_length + 1), fmt, va);
-            log_func(buf);
+            fmt_length = ts_formatlength(fmt, va) + 1; // include extra NULL character
             va_end(va);
-            delete[] buf;
-        }
+            {
+                    char *buf = new char[tag_length + fmt_length + 1]; // extra char for space between tag and text
+                    strcpy(buf, tag);
+                    buf[tag_length] = ' ';  // add space
+                    va_start(va, fmt);
+                    ts_formatstring((buf + tag_length + 1), fmt, va);
+                    logFunc(buf);
+                    va_end(va);
+                    delete[] buf;
+            }
     }
 }

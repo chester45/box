@@ -5,19 +5,19 @@
 
 #define ENABLE_LOG  (1)
 
-typedef void(*log_func_t)(char *);
+typedef void(*LogFunc_t)(char *);
 
 #define DEFINE_DEBUG_TAG(debugTag) const char _debug_tag[] = debugTag
 
-void log_initialize(const log_func_t);
-void log_printf(const char *fmt, ...);
-void log_printf_debug(const char *tag, const char *fmt, ...);
+void LogInitialize(const LogFunc_t);
+void LogPrintf(const char *fmt, ...);
+void LogPrintfDebug(const char *tag, const char *fmt, ...);
 
 #if ENABLE_LOG
-    #define LOG_BASIC(str, ...) log_printf(str, ##__VA_ARGS__)
-    #define LOG(str, ...) log_printf_debug(_debug_tag, str, ##__VA_ARGS__)
+        #define LOG_BASIC(str, ...) LogPrintf(str, ##__VA_ARGS__)
+        #define LOG(str, ...) LogPrintfDebug(_debug_tag, str, ##__VA_ARGS__)
 #else
-    #define LOG(str, ...) ;
+        #define LOG(str, ...) ;
 #endif
 
 #endif
