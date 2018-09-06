@@ -15,6 +15,7 @@ static void ExecuteHelpCmd(void);
 static void ExecuteDebugCmd(void);
 static void ExecuteMoveServoCmd(void);
 static void ExecuteGetServoPosCmd(void);
+static void ExecuteSetBrightnessCmd(void);
 static void ExecuteResetCmd(void);
 
 static Box::Box *box_p = NULL;
@@ -30,12 +31,13 @@ Command_t debugCmd;
 
 void (*ResetFunc)(void) = 0;
 
-DebugCommand_t debugCmdTable [] = {
-        {'h', ExecuteHelpCmd,        "Print help: h"},
-        {'d', ExecuteDebugCmd,       "Enable debug mode: d [0/1]"},
-        {'s', ExecuteMoveServoCmd,   "Set servo position: s [srv_num] [pos] [speed]"},
-        {'g', ExecuteGetServoPosCmd, "Get servo postiion: s [srv_num]"},
-        {'r', ExecuteResetCmd,       "Reset the device: r [1]"},
+static const DebugCommand_t debugCmdTable [] = {
+        {'h', ExecuteHelpCmd,           "Print help: h"},
+        {'d', ExecuteDebugCmd,          "Enable debug mode:  d [0/1]"},
+        {'s', ExecuteMoveServoCmd,      "Set servo position: s [srv_num] [pos] [speed]"},
+        {'g', ExecuteGetServoPosCmd,    "Get servo postiion: s [srv_num]"},
+        {'g', ExecuteSetBrightnessCmd,  "Set LED pwm value:  b [value]"},
+        {'r', ExecuteResetCmd,          "Reset the device:   r [1]"},
         // must always be last
         {' ', NULL, NULL}
 };
@@ -156,7 +158,7 @@ static void ExecuteHelpCmd()
                 if (debugCmdTable[idx].h_str) {
                         LOG_BASIC(" %s", debugCmdTable[idx].h_str);
                 } else {
-                        LOG_BASIC(" no help available");
+                        LOG_BASIC(F(" no help available"));
                 }
                 LOG_BASIC("\n");
                 idx++;
@@ -193,6 +195,11 @@ static void ExecuteGetServoPosCmd()
                 uint8_t pos = box_p->DebugGetServoPosition(CMD_PARAM_1);
                 LOG("Srv: %d, Pos: %d\n", CMD_PARAM_1, pos);
         }
+}
+
+static void ExecuteSetBrightnessCmd()
+{
+        // box_p->DebugSetBrightness(CMD_PARAM_1);
 }
 
 static void ExecuteResetCmd()
