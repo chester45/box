@@ -215,7 +215,7 @@ static void ExecuteGetServoPosCmd()
 
 static void ExecuteSetBrightnessCmd()
 {
-        // box_p->DebugSetBrightness(CMD_PARAM_1);
+        box_p->DebugSetLedBrightness(CMD_PARAM_1);
 }
 
 static void ExecuteResetCmd()

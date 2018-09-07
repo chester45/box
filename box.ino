@@ -60,7 +60,8 @@ void setup()
         Serial.begin(9600);
         delay(20);
         LOG_PM("Setup start ...\n");
-        box = new Box::Box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_ARM_SERVO_PIN);
+        box = new Box::Box(DEFAULT_USER_SWITCH, DEFAULT_COVER_SERVO_PIN, DEFAULT_ARM_SERVO_PIN,
+                                                                                DEFAULT_LED_PIN);
         InitDebugModule(box);
         pinMode(STATUS_LED_PIN, OUTPUT);
 

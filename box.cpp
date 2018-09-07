@@ -34,28 +34,34 @@ namespace Box
 
 DEFINE_DEBUG_TAG("[BOX]");
 
-#define BOX_DELAY       (2000) // 2 sec
-#define PWM_DELAY       (1000) // 1 sec
-#define COOL_DOWN_DELAY (1000)    // 1sec
+#define BOX_DELAY               (2000) // 2 sec
+#define PWM_DELAY               (1000) // 1 sec
+#define COOL_DOWN_DELAY         (1000)    // 1sec
+#define LED_FADE_DEALY          (100)
 
 const uint8_t Box::SpeedLUT[INVALID] PROGMEM = {0, 5, 25, 50};
 
 void CoolDownTimerCallback(void*);
+void LedFadeTimerCallback(void*);
 
-Box::Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin)
+Box::Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin, uint8_t ledPin)
 {
         userSwitchPin = switchPin;
         this->coverServoPin = coverServoPin;
         this->armServoPin = armServoPin;
+        this->ledPin = ledPin;
         angryLevel = 0;
         coolDownTimer = TimerObjectManager::GetManager()->CreateTimer(COOL_DOWN_DELAY, this,
                                                                 CoolDownTimerCallback, false);
+        ledFadeTimer = TimerObjectManager::GetManager()->CreateTimer(LED_FADE_DEALY, this,
+                                                                LedFadeTimerCallback, false);
         Setup();
 }
 
 void Box::Setup()
 {
         pinMode(userSwitchPin, INPUT_PULLUP);
+        pinMode(ledPin, OUTPUT);
         coverServo.attach(coverServoPin);
         armServo.attach(armServoPin);
         coverServo.write(0);
@@ -102,6 +108,11 @@ void Box::CoolDownEvent()
 
 }
 
+void Box::LedFadeEvent()
+{
+
+}
+
 void Box::IncreaseAngryLevel()
 {
         if (angryLevel < 255)
@@ -114,6 +125,11 @@ void Box::DecreaseAngryLevel()
                 angryLevel-- ;
 }
 
+void Box::SetLedBrightness(uint8_t value)
+{
+        analogWrite(ledPin, value);
+}
+
 void Box::DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed)
 {
         Servo &srv = (!servoNum) ? coverServo : armServo;
@@ -124,6 +140,11 @@ uint8_t Box::DebugGetServoPosition(uint8_t servoNum)
 {
         Servo &srv = (!servoNum) ? coverServo : armServo;
         return (srv.read());
+}
+
+void Box::DebugSetLedBrightness(uint8_t value)
+{
+        SetLedBrightness(value);
 }
 
 void Box::RunNormalSequence()
@@ -154,6 +175,12 @@ void CoolDownTimerCallback(void *param)
 {
         Box *obj = static_cast<Box*>(param);
         obj->CoolDownEvent();
+}
+
+void LedFadeTimerCallback(void *param)
+{
+        Box *obj = static_cast<Box*>(param);
+        obj->LedFadeEvent();
 }
 
 }

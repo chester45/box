@@ -11,8 +11,9 @@
 #define LED_AMBIENT 4
 
 #define DEFAULT_USER_SWITCH             2
-#define DEFAULT_COVER_SERVO_PIN         9
+#define DEFAULT_COVER_SERVO_PIN         8
 #define DEFAULT_ARM_SERVO_PIN           10
+#define DEFAULT_LED_PIN                 9
 
 //On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
 
@@ -53,25 +54,29 @@ private:
         uint8_t userSwitchPin;
         uint8_t coverServoPin;
         uint8_t armServoPin;
+        uint8_t ledPin;
         Servo coverServo;
         Servo armServo;
         uint8_t coolDownTimer;
+        uint8_t ledFadeTimer;
         uint8_t angryLevel;
 
         void TriggerAction();
         void MoveServo(Servo &servo, uint8_t position, MoveSpeed_t speed);
         void CoolDownEvent();
+        void LedFadeEvent();
         void IncreaseAngryLevel();
         void DecreaseAngryLevel();
         void RunNormalSequence();
         void RunFastSequence();
         void RunSlowSequence();
+        void SetLedBrightness(uint8_t);
 
         friend void CoolDownTimerCallback(void*);
-
+        friend void LedFadeTimerCallback(void*);
 public:
 
-        Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin);
+        Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin, uint8_t ledPin);
         void timerDelayCallback();
         void timerSwitchPwmCallback();
         void Setup();
@@ -80,6 +85,7 @@ public:
         uint8_t GetSwitchPin() const;
         void DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed);
         uint8_t DebugGetServoPosition(uint8_t servoNum);
+        void DebugSetLedBrightness(uint8_t value);
 };
 }
 
