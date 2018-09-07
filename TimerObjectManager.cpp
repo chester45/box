@@ -31,7 +31,7 @@ uint8_t TimerObjectManager::CreateTimer(unsigned long int ms, void *param,
                 TimersArray[timerIndex] = new TimerObject(ms, param, callback, isSingle);
                 LOG("Create timer with index: %d\n", timerIndex);
         } else {
-                LOG("Failed to create timer object\n");
+                LOG_PM("Failed to create timer object\n");
         }
         return timerIndex;
 }
@@ -51,7 +51,6 @@ uint8_t TimerObjectManager::GetFreeTimer()
         uint8_t idx = 0;
 
         for (idx = 0; idx < MAX_TIMER_OBJECTS; idx++) {
-                LOG("Idx: %d, val: %d\n", idx, TimersArray[idx]);
                 if (TimersArray[idx] == NULL) {
                         timerIndex = idx;
                         break;  /// Break the loop sinde we found free slot for timer

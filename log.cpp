@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <Arduino.h>
 #include "log.h"
-
-LogFunc_t logFunc = NULL;
+#include "avr/pgmspace.h"
 
 /**
 **---------------------------------------------------------------------------
@@ -137,11 +137,6 @@ static uint16_t ts_formatlength(const char *fmt, va_list va)
         return length;
 }
 
-void LogInitialize(const LogFunc_t funcPtr)
-{
-        logFunc = funcPtr;
-}
-
 /**
 **===========================================================================
 **  Abstract: Loads data from the given locations and writes them to the
@@ -152,22 +147,20 @@ void LogInitialize(const LogFunc_t funcPtr)
 */
 void LogPrintf(const char *fmt, ...)
 {
-    if (logFunc) {
-            uint16_t length = 0;
-            va_list va;
-            va_start(va, fmt);
-            length = ts_formatlength(fmt, va) + 1;
-            va_end(va);
-            {
-                    char *buf = new char[length];
-                    memset(buf, 0x00, length);
-                    va_start(va, fmt);
-                    length = ts_formatstring(buf, fmt, va);
-                    logFunc(buf);
-                    va_end(va);
-                    delete[] buf;
-            }
-    }
+        uint16_t length = 0;
+        va_list va;
+        va_start(va, fmt);
+        length = ts_formatlength(fmt, va) + 1;
+        va_end(va);
+        {
+                char *buf = new char[length];
+                memset(buf, 0x00, length);
+                va_start(va, fmt);
+                length = ts_formatstring(buf, fmt, va);
+                Serial.print(buf);
+                va_end(va);
+                delete[] buf;
+        }
 }
 /**
 **===========================================================================
@@ -179,22 +172,33 @@ void LogPrintf(const char *fmt, ...)
 */
 void LogPrintfDebug(const char *tag, const char *fmt, ...)
 {
-    if (logFunc) {
-            uint16_t fmt_length = 0;
-            uint16_t tag_length = strlen(tag);
-            va_list va;
-            va_start(va, fmt);
-            fmt_length = ts_formatlength(fmt, va) + 1; // include extra NULL character
-            va_end(va);
-            {
-                    char *buf = new char[tag_length + fmt_length + 1]; // extra char for space between tag and text
-                    strcpy(buf, tag);
-                    buf[tag_length] = ' ';  // add space
-                    va_start(va, fmt);
-                    ts_formatstring((buf + tag_length + 1), fmt, va);
-                    logFunc(buf);
-                    va_end(va);
-                    delete[] buf;
-            }
-    }
+
+        uint16_t fmt_length = 0;
+        uint16_t tag_length = strlen_P(tag);
+        va_list va;
+        va_start(va, fmt);
+        fmt_length = ts_formatlength(fmt, va) + 1; // include extra NULL character
+        va_end(va);
+        {
+                char *buf = new char[tag_length + fmt_length + 1]; // extra char for space between tag and text
+                strcpy_P(buf, tag);
+                buf[tag_length] = ' ';  // add space
+                va_start(va, fmt);
+                ts_formatstring((buf + tag_length + 1), fmt, va);
+                Serial.print(buf);
+                va_end(va);
+                delete[] buf;
+        }
+}
+
+void LogPrintf_PMEM(const __FlashStringHelper *str)
+{
+        Serial.print(str);
+}
+
+void LogPrintDebug_PMEM(const __FlashStringHelper *tag, const __FlashStringHelper *str)
+{
+        Serial.print(tag);
+        Serial.print(' ');
+        Serial.print(str);
 }

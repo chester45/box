@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/pgmspace.h>
 #include "Box.h"
 #include "TimerObjectManager.h"
 #include "log.h"
@@ -37,7 +38,7 @@ DEFINE_DEBUG_TAG("[BOX]");
 #define PWM_DELAY       (1000) // 1 sec
 #define COOL_DOWN_DELAY (1000)    // 1sec
 
-const uint8_t Box::SpeedLUT[INVALID] = {0, 5, 25, 50};
+const uint8_t Box::SpeedLUT[INVALID] PROGMEM = {0, 5, 25, 50};
 
 void CoolDownTimerCallback(void*);
 
@@ -86,7 +87,7 @@ uint8_t Box::GetSwitchPin() const
 
 void Box::MoveServo(Servo &servo, uint8_t newPosition, MoveSpeed_t speed)
 {
-        uint8_t delayTime = SpeedLUT[speed];
+        uint8_t delayTime = pgm_read_byte(SpeedLUT + speed);
         uint8_t currentPosition = servo.read();
 
         while(currentPosition != newPosition) {

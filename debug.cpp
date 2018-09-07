@@ -29,15 +29,24 @@ Command_t debugCmd;
 #define CMD_PARAM_2             debugCmd.params[1]
 #define CMD_PARAM_3             debugCmd.params[2]
 
+#define TEMP_BUF_SIZE           (80)
+
 void (*ResetFunc)(void) = 0;
 
-static const DebugCommand_t debugCmdTable [] = {
-        {'h', ExecuteHelpCmd,           "Print help: h"},
-        {'d', ExecuteDebugCmd,          "Enable debug mode:  d [0/1]"},
-        {'s', ExecuteMoveServoCmd,      "Set servo position: s [srv_num] [pos] [speed]"},
-        {'g', ExecuteGetServoPosCmd,    "Get servo postiion: s [srv_num]"},
-        {'g', ExecuteSetBrightnessCmd,  "Set LED pwm value:  b [value]"},
-        {'r', ExecuteResetCmd,          "Reset the device:   r [1]"},
+static const char h_help[] PROGMEM = "Print help: h";
+static const char d_help[] PROGMEM = "Enable debug mode:  d [0/1]";
+static const char s_help[] PROGMEM = "Set servo position: s [srv_num] [pos] [speed]";
+static const char g_help[] PROGMEM = "Get servo postiion: g [srv_num]";
+static const char b_help[] PROGMEM = "Set LED pwm value:  b [value]";
+static const char r_help[] PROGMEM = "Reset the device:   r [1]";
+
+static const DebugCommand_t debugCmdTable[] = {
+        {'h', ExecuteHelpCmd,           h_help},
+        {'d', ExecuteDebugCmd,          d_help},
+        {'s', ExecuteMoveServoCmd,      s_help},
+        {'g', ExecuteGetServoPosCmd,    g_help},
+        {'g', ExecuteSetBrightnessCmd,  b_help},
+        {'r', ExecuteResetCmd,          r_help},
         // must always be last
         {' ', NULL, NULL}
 };
@@ -49,7 +58,7 @@ static const DebugCommand_t debugCmdTable [] = {
 void InitDebugModule(Box::Box *box)
 {
         if (!box) {
-                LOG("Failed to init debug module\n");
+                LOG_PM("Failed to init debug module\n");
                 return;
         }
         ResetCommandInfo();
@@ -147,20 +156,27 @@ static void ExecuteCommand()
         }
 
         if (!cmdFound)
-                LOG("Invalid command\n");
+                LOG_PM("Invalid command\n");
 }
 
 static void ExecuteHelpCmd()
 {
         uint8_t idx = 0;
+        char help[100];
         while (debugCmdTable[idx].cmd != ' ') {
                 LOG_BASIC("\t%c", debugCmdTable[idx].cmd);
                 if (debugCmdTable[idx].h_str) {
-                        LOG_BASIC(" %s", debugCmdTable[idx].h_str);
+                        size_t h_len = strlen_P(debugCmdTable[idx].h_str);
+                        if (h_len >= 100) {
+                                LOG_BASIC_PM("help string to long!");
+                        } else {
+                                strcpy_P(help, debugCmdTable[idx].h_str);
+                                LOG_BASIC(" %s", help);
+                        }
                 } else {
-                        LOG_BASIC(F(" no help available"));
+                        LOG_BASIC_PM(" no help available");
                 }
-                LOG_BASIC("\n");
+                LOG_BASIC_PM("\n");
                 idx++;
         }
 }
@@ -168,10 +184,10 @@ static void ExecuteHelpCmd()
 static void ExecuteDebugCmd(void)
 {
         if (CMD_PARAM_1 == 1) {
-                LOG("Debug mode enabled\n");
+                LOG_PM("Debug mode enabled\n");
                 DebugModeEnabled = 1;
         } else if (CMD_PARAM_1 == 0) {
-                LOG("Debug mode disabled\n");
+                LOG_PM("Debug mode disabled\n");
                 DebugModeEnabled = 0;
         } else {
                 LogInvalidParams();
@@ -208,10 +224,10 @@ static void ExecuteResetCmd()
                 LogInvalidParams();
                 return;
         }
-        LOG("Resetting platform ... \n");
+        LOG_PM("Resetting platform ... \n");
         // watchdog does not work with nano - some bootloader issues
         //wdt_enable(WDTO_1S);
         delay(3000);
         ResetFunc();
-        LOG("Fail to reset ! \n");
+        LOG_PM("Fail to reset ! \n");
 }
