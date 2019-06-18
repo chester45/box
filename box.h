@@ -2,6 +2,7 @@
 #define BOX_H_
 
 #include <stdint.h>
+#include <Servo.h>
 #include "TimerObject.h"
 
 #define SRV_COVER   1
@@ -9,38 +10,82 @@
 #define LED_SWITCH  3
 #define LED_AMBIENT 4
 
-#define DEFAULT_USER_SWITCH 2
+#define DEFAULT_USER_SWITCH             2
+#define DEFAULT_COVER_SERVO_PIN         8
+#define DEFAULT_ARM_SERVO_PIN           10
+#define DEFAULT_LED_PIN                 9
+
+//On most Arduino boards (those with the ATmega168 or ATmega328P), this function works on pins 3, 5, 6, 9, 10, and 11.
+
+enum MoveSpeed_t {
+        IMMEDIATE = 0,
+        FAST = 1,
+        NORMAL = 2,
+        SLOW = 3,
+        INVALID
+};
+
+typedef struct {
+        uint8_t move_1;
+        uint8_t speed_1;
+        uint8_t move_2;
+        uint8_t speed_2;
+        uint8_t repeat;
+} ServoSequence_t;
+
+typedef struct {
+        uint8_t move;
+        uint8_t speed;
+} Movement_t;
+
+typedef struct {
+        uint8_t move_cnt;
+        uint8_t repeat;
+        Movement_t moves[2];
+} Sequence_t;
 
 namespace Box
 {
 class Box {
 
 private:
-    enum class BoxState {
-        IDLE,
-        WAIT,
-        SWITCH_CHANGE,
-        IN_ACTION
-    };
 
-    uint8_t UserSwitchPin;
+        static const uint8_t SpeedLUT[INVALID];
+        uint8_t userSwitchPin;
+        uint8_t coverServoPin;
+        uint8_t armServoPin;
+        uint8_t ledPin;
+        Servo coverServo;
+        Servo armServo;
+        uint8_t coolDownTimer;
+        uint8_t ledFadeTimer;
+        uint8_t angryLevel;
 
-    BoxState state;
-    TimerObject *timer_delay;
-    TimerObject *timer_swtich_pwm;
+        void TriggerAction();
+        void MoveServo(Servo &servo, uint8_t position, MoveSpeed_t speed);
+        void CoolDownEvent();
+        void LedFadeEvent();
+        void IncreaseAngryLevel();
+        void DecreaseAngryLevel();
+        void RunNormalSequence();
+        void RunFastSequence();
+        void RunSlowSequence();
+        void SetLedBrightness(uint8_t);
 
-    void SetState(const BoxState new_state) {state = new_state;}
-
+        friend void CoolDownTimerCallback(void*);
+        friend void LedFadeTimerCallback(void*);
 public:
-    Box(uint8_t SwitchPin);
-    void timerDelayCallback();
-    void timerSwitchPwmCallback();
-    void Setup();
-    void Check();
-    bool IsIdle() const;
-    uint8_t GetSwitchPin() const;
-    static void staticDelayCallback(void *box) {static_cast<Box*>(box)->timerDelayCallback();};
-    static void staticSwitchPwmCallback(void *box) {static_cast<Box*>(box)->timerSwitchPwmCallback();};
+
+        Box(uint8_t switchPin, uint8_t coverServoPin, uint8_t armServoPin, uint8_t ledPin);
+        void timerDelayCallback();
+        void timerSwitchPwmCallback();
+        void Setup();
+        void Check();
+        bool IsIdle() const;
+        uint8_t GetSwitchPin() const;
+        void DebugMoveServo(uint8_t servoNum, uint8_t position, MoveSpeed_t speed);
+        uint8_t DebugGetServoPosition(uint8_t servoNum);
+        void DebugSetLedBrightness(uint8_t value);
 };
 }
 

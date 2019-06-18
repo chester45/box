@@ -25,7 +25,6 @@ public:
 	TimerObject(unsigned long int ms, CallBackType callback);
 	TimerObject(unsigned long int ms, CallBackType callback, bool isSingle);
 	TimerObject(unsigned long int ms, void *obj, ObjCallBackType callback, bool isSingle);
-	~TimerObject();
 
 	void setInterval(unsigned long int ms);
 	void setEnabled(bool Enabled);
